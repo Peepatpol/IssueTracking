@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Central Group - Online Booking UAT Executive Dashboard</title>
+  
+  <!-- CSS Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+  
+  <!-- Vendor Scripts (Local offline copies) -->
+  <script src="vendor/chart.umd.min.js"></script>
+  <script src="vendor/xlsx.full.min.js"></script>
+  <script src="vendor/lucide.min.js"></script>
+
+  <!-- Pre-extracted Offline Data -->
+  <script src="data.js"></script>
+</head>
+<body>
+  <div class="app-container">
+    
+    <!-- Top Executive Header -->
+    <header class="executive-header">
+      <div class="brand-section">
+        <div class="brand-logo-badge" title="Central Group Digital Supply Chain">
+          CG
+        </div>
+        <div class="brand-title-wrap">
+          <h1>
+            Central Group — Online Booking UAT Executive Dashboard
+            <span class="header-status-pill">
+              <span class="status-dot-pulse"></span>
+              99.3% PASSED / READY FOR GO-LIVE
+            </span>
+          </h1>
+          <p id="last-sync-time">
+            WMS Sprint FC Booking Slot &bull; ข้อมูลทดสอบ Test Script #4 และ แจ้ง Issue Slot Booking UAT 5
+          </p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button class="action-btn" id="theme-toggle-btn" title="สลับโหมด Dark / Light">
+          <i data-lucide="sun" id="theme-icon"></i>
+          <span>ธีมสี</span>
+        </button>
+
+        <button class="action-btn" id="fullscreen-btn" title="ขยายเต็มจอสำหรับนำเสนอผู้บริหาร">
+          <i data-lucide="maximize"></i>
+          <span>เต็มจอ</span>
+        </button>
+
+        <button class="action-btn" id="print-summary-btn" title="พิมพ์หรือบันทึกเป็น PDF สรุปสำหรับผู้บริหาร">
+          <i data-lucide="printer"></i>
+          <span>พิมพ์สรุป PDF</span>
+        </button>
+
+        <button class="action-btn primary" onclick="switchTab('sync')" title="รีเฟรชหรืออัปเดตไฟล์ Excel">
+          <i data-lucide="refresh-cw"></i>
+          <span>รีเฟรชข้อมูล</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Navigation Tab Bar -->
+    <nav class="tab-navigation" aria-label="Dashboard Tabs">
+      <button class="tab-btn active" data-tab="overview">
+        <i data-lucide="layout-dashboard"></i>
+        <span>ภาพรวมผู้บริหาร (Overview)</span>
+      </button>
+
+      <button class="tab-btn" data-tab="booking">
+        <i data-lucide="check-square"></i>
+        <span>สคริปต์ทดสอบ #4 (Test Script)</span>
+        <span class="tab-badge" id="booking-badge-count">186</span>
+      </button>
+
+      <button class="tab-btn" data-tab="issues">
+        <i data-lucide="alert-octagon"></i>
+        <span>ติดตาม Issue UAT 5 (Issues)</span>
+        <span class="tab-badge" id="issues-badge-count">422</span>
+      </button>
+
+      <button class="tab-btn" data-tab="sync">
+        <i data-lucide="database"></i>
+        <span>อัปเดตและรีเฟรชข้อมูล (Data Sync)</span>
+      </button>
+    </nav>
+
+    <!-- ======================================================== -->
+    <!-- TAB 1: EXECUTIVE OVERVIEW PANEL                          -->
+    <!-- ======================================================== -->
+    <main id="tab-panel-overview" class="tab-content-panel">
+      
+      <!-- Executive KPI Cards -->
+      <section class="kpi-grid">
+        <!-- KPI 1 -->
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <span class="kpi-title">ผลการทดสอบ Test Script #4</span>
+            <div class="kpi-icon-wrap" style="color:var(--status-pass); background:var(--status-pass-subtle)">
+              <i data-lucide="check-circle-2"></i>
+            </div>
+          </div>
+          <div class="kpi-value-row">
+            <span class="kpi-value" id="kpi-test-passed" style="color:var(--status-pass)">144</span>
+            <span id="kpi-test-total" style="color:var(--text-secondary); font-size:15px; font-weight:600">/ 145 เคส</span>
+          </div>
+          <div class="kpi-subtext">
+            <span class="kpi-pill pass" id="kpi-test-rate">99.3% Pass Rate</span>
+            <span>(ไม่ผ่านเพียง 1 เคส ใน Warehouse)</span>
+          </div>
+        </div>
+
+        <!-- KPI 2 -->
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <span class="kpi-title">การจัดการ Issue ทั้งหมด</span>
+            <div class="kpi-icon-wrap" style="color:var(--accent-blue); background:var(--accent-blue-subtle)">
+              <i data-lucide="shield-check"></i>
+            </div>
+          </div>
+          <div class="kpi-value-row">
+            <span class="kpi-value" id="kpi-issue-total">422</span>
+            <span style="color:var(--text-secondary); font-size:14px; font-weight:500">ปัญหาที่แจ้ง</span>
+          </div>
+          <div class="kpi-subtext">
+            <span class="kpi-pill pass" id="kpi-issue-resolved">399 แก้ไขแล้ว (94.5%)</span>
+          </div>
+        </div>
+
+        <!-- KPI 3 -->
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <span class="kpi-title">Workaround & Go-Live Plan</span>
+            <div class="kpi-icon-wrap" style="color:var(--status-warning); background:var(--status-warning-subtle)">
+              <i data-lucide="file-check"></i>
+            </div>
+          </div>
+          <div class="kpi-value-row">
+            <span class="kpi-value" id="kpi-workaround-count" style="color:var(--status-warning)">15</span>
+            <span style="color:var(--text-secondary); font-size:14px; font-weight:500">เคส</span>
+          </div>
+          <div class="kpi-subtext">
+            <span class="kpi-pill warning">ยอมรับได้</span>
+            <span>มีกระบวนการรองรับ + นัดคุยหลัง Go-live</span>
+          </div>
+        </div>
+
+        <!-- KPI 4 -->
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <span class="kpi-title">คงค้างรอทดสอบซ้ำ (Pending)</span>
+            <div class="kpi-icon-wrap" style="color:var(--status-info); background:var(--status-info-subtle)">
+              <i data-lucide="hourglass"></i>
+            </div>
+          </div>
+          <div class="kpi-value-row">
+            <span class="kpi-value" id="kpi-pending-count" style="color:var(--status-info)">2</span>
+            <span style="color:var(--text-secondary); font-size:14px; font-weight:500">เคสตกค้าง</span>
+          </div>
+          <div class="kpi-subtext">
+            <span class="kpi-pill pass">ความเสี่ยงต่ำมาก (0.5%)</span>
+            <span>ไม่มีบล็อกเกอร์ระบบ</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Main Visuals Grid -->
+      <section class="charts-grid-main">
+        <!-- Cumulative S-Curve Chart (Exact match to summary#4) -->
+        <div class="dashboard-card">
+          <div class="card-header-bar">
+            <div class="card-title-group">
+              <h2>
+                <i data-lucide="trending-up" style="color:var(--accent-blue)"></i>
+                UAT Progress S-Curve — ความคืบหน้าสะสมเทียบเป้าหมาย
+              </h2>
+              <p>เส้นกราฟสรุปรูปแบบเดียวกับชีต summary#4 (เป้าหมายสะสม, ทดสอบสะสม, ผ่านสะสม ตลอดช่วงทดสอบ)</p>
+            </div>
+            
+            <div class="card-controls">
+              <div class="toggle-group">
+                <button class="toggle-btn timeline-toggle-btn active" data-view="cumulative">S-Curve สะสม</button>
+                <button class="toggle-btn timeline-toggle-btn" data-view="daily">ปริมาณรายวัน</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="chart-canvas-wrap">
+            <canvas id="timeline-chart"></canvas>
+          </div>
+        </div>
+
+        <!-- Test Pass Rate Donut & Module Matrix -->
+        <div class="dashboard-card">
+          <div class="card-header-bar">
+            <div class="card-title-group">
+              <h2>
+                <i data-lucide="pie-chart" style="color:var(--status-pass)"></i>
+                ความพร้อมแยกตามโมดูล (Module Health)
+              </h2>
+              <p>สัดส่วนความสำเร็จรายระบบงานหลัก</p>
+            </div>
+          </div>
+
+          <div style="position:relative; height:160px; margin-bottom:16px">
+            <canvas id="overview-donut-chart"></canvas>
+            <div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; pointer-events:none">
+              <span id="overview-donut-pct" style="font-size:24px; font-weight:800; color:var(--text-primary)">99.3%</span>
+              <span style="font-size:11px; color:var(--text-muted); font-weight:600">PASS RATE</span>
+            </div>
+          </div>
+
+          <!-- Module Progress List -->
+          <div class="modules-list" id="module-list-container">
+            <!-- Dynamically populated via JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Executive Assessment Banner -->
+      <section class="dashboard-card" style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.9) 100%); border-left: 4px solid var(--status-pass)">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:20px; flex-wrap:wrap">
+          <div>
+            <h3 style="font-size:16px; font-weight:700; color:var(--text-primary); margin-bottom:6px; display:flex; align-items:center; gap:8px">
+              <i data-lucide="check-check" style="color:var(--status-pass)"></i>
+              สรุปข้อเสนอแนะสำหรับผู้บริหาร (Executive Sign-off Recommendation)
+            </h3>
+            <p style="font-size:13.5px; color:var(--text-secondary); line-height:1.6; max-width:1100px">
+              1. <strong>ความพร้อมด้านฟังก์ชันการทำงาน:</strong> สคริปต์ทดสอบ Test #4 ผ่านเกณฑ์ 144 จาก 145 เคส (คิดเป็น 99.3%) โดยโมดูล Config, Online, Cross dock, Report สำเร็จ 100% เต็ม มีเพียง Warehouse 1 เคสที่พบข้อติดขัดเล็กน้อย<br>
+              2. <strong>การจัดการข้อบกพร่อง (Issue Management):</strong> รายการแจ้งปัญหารวม 422 รายการ ได้รับการแก้ไขและทดสอบผ่านแล้ว 399 รายการ (94.5%) โดยรายการที่เหลือ 15 รายการเป็น Workaround หรือมีมติข้อตกลงในการประชุมสำหรับระยะหลัง Go-live<br>
+              3. <strong>ข้อสรุปความเสี่ยง:</strong> ไม่มี Critical Blocker ที่ขัดขวางการเปิดใช้งานระบบ ระบบ Slot Booking Online UAT มีความพร้อมในระดับ <strong>High Readiness สำหรับการดำเนินการ Go-Live ตามกำหนดการ</strong>
+            </p>
+          </div>
+          <div style="text-align:right">
+            <span class="badge badge-pass" style="font-size:13px; padding:6px 14px; border-radius:8px">
+              APPROVED & READY FOR LAUNCH
+            </span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- ======================================================== -->
+    <!-- TAB 2: BOOKING TEST SCRIPT PANEL (#4)                    -->
+    <!-- ======================================================== -->
+    <main id="tab-panel-booking" class="tab-content-panel" style="display:none">
+      
+      <!-- Filter Bar -->
+      <section class="filter-bar">
+        <!-- Module filter -->
+        <div class="filter-group">
+          <label for="booking-filter-module">โมดูล / ระบบงาน (Type)</label>
+          <select id="booking-filter-module" class="filter-select">
+            <option value="all">โมดูลทั้งหมด (All Modules)</option>
+          </select>
+        </div>
+
+        <!-- Result filter -->
+        <div class="filter-group">
+          <label for="booking-filter-result">ผลการทดสอบ (Result)</label>
+          <select id="booking-filter-result" class="filter-select">
+            <option value="all">ผลลัพธ์ทั้งหมด (All)</option>
+            <option value="Pass">Pass (ผ่าน)</option>
+            <option value="Not Pass">Not Pass (ไม่ผ่าน)</option>
+            <option value="Not Applicable">Not Applicable (ไม่เกี่ยวข้อง)</option>
+          </select>
+        </div>
+
+        <!-- Search input -->
+        <div class="filter-group" style="flex:1">
+          <label for="booking-search-input">ค้นหาในสคริปต์</label>
+          <div class="search-input-wrap">
+            <i data-lucide="search"></i>
+            <input type="text" id="booking-search-input" placeholder="พิมพ์ชื่อ Test Case, ฟังก์ชัน, หมายเลข หรือหมายเหตุ...">
+          </div>
+        </div>
+
+        <!-- Reset Button -->
+        <button class="reset-filters-btn" id="reset-booking-filters-btn">
+          <i data-lucide="rotate-ccw"></i>
+          <span>ล้างตัวกรอง</span>
+        </button>
+      </section>
+
+      <!-- KPI Mini Bar -->
+      <section class="filter-bar" style="padding:10px 20px; justify-content:space-between">
+        <div style="display:flex; gap:20px; align-items:center; font-size:13px">
+          <span>พบ: <strong id="booking-count-total" style="color:var(--text-primary)">0</strong> รายการ</span>
+          <span style="color:var(--status-pass)">ผ่าน (Pass): <strong id="booking-count-pass">0</strong></span>
+          <span style="color:var(--status-danger)">ไม่ผ่าน (Not Pass): <strong id="booking-count-notpass">0</strong></span>
+          <span style="color:var(--text-muted)">N/A: <strong id="booking-count-na">0</strong></span>
+        </div>
+        <button class="action-btn" id="export-booking-csv" style="padding:5px 12px; font-size:12px">
+          <i data-lucide="download"></i>
+          <span>ส่งออก CSV</span>
+        </button>
+      </section>
+
+      <!-- Data Table -->
+      <section class="table-container">
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th style="width:60px">No.</th>
+                <th style="width:110px">โมดูล</th>
+                <th style="width:160px">ฟังก์ชัน</th>
+                <th>รายละเอียดกรณีทดสอบ (Test Case)</th>
+                <th style="width:140px">ทีมทดสอบ</th>
+                <th style="width:105px">วันที่เทส</th>
+                <th style="width:105px">วันที่ Pass</th>
+                <th style="width:110px">ผลลัพธ์</th>
+                <th style="width:200px">ข้อคิดเห็น (Remarks)</th>
+              </tr>
+            </thead>
+            <tbody id="booking-table-body">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination Bar -->
+        <div class="pagination-bar">
+          <span id="booking-page-info">หน้า 1 จาก 1</span>
+          <div class="page-controls">
+            <button class="page-btn" id="booking-prev-btn">ก่อนหน้า</button>
+            <button class="page-btn" id="booking-next-btn">ถัดไป</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- ======================================================== -->
+    <!-- TAB 3: UAT ISSUE TRACKER & ANALYSIS                      -->
+    <!-- ======================================================== -->
+    <main id="tab-panel-issues" class="tab-content-panel" style="display:none">
+      
+      <!-- Multi-Filter Control Bar (Strictly addresses prompt criteria!) -->
+      <section class="filter-bar">
+        <!-- 1. Result Filter -->
+        <div class="filter-group">
+          <label for="issue-filter-result">ผลการแก้ไข (Result)</label>
+          <select id="issue-filter-result" class="filter-select">
+            <option value="all">ผลลัพธ์ทั้งหมด (All Results)</option>
+          </select>
+        </div>
+
+        <!-- 2. Urgency Filter -->
+        <div class="filter-group">
+          <label for="issue-filter-urgency">ความเร่งด่วน (Urgency)</label>
+          <select id="issue-filter-urgency" class="filter-select">
+            <option value="all">ทุกระดับ (All Urgency)</option>
+            <option value="High">High (ความเร่งด่วนสูง)</option>
+            <option value="Medium">Medium (ปานกลาง)</option>
+            <option value="Low">Low (ต่ำ)</option>
+          </select>
+        </div>
+
+        <!-- 3. Type Filter -->
+        <div class="filter-group">
+          <label for="issue-filter-type">ประเภทรายการ (Type)</label>
+          <select id="issue-filter-type" class="filter-select">
+            <option value="all">ทุกประเภท (All Types)</option>
+            <option value="Issue">Issue (ปัญหา/บั๊ก)</option>
+            <option value="Request">Request (คำขอปรับปรุง)</option>
+          </select>
+        </div>
+
+        <!-- 4. Date Filter -->
+        <div class="filter-group">
+          <label for="issue-filter-date-preset">ช่วงวันที่แจ้ง (Date)</label>
+          <select id="issue-filter-date-preset" class="filter-select">
+            <option value="all">ทุกช่วงวันที่ (All Dates)</option>
+            <option value="sep2024">กันยายน 2024 (Sep 2024)</option>
+            <option value="oct2024">ตุลาคม 2024 (Oct 2024)</option>
+            <option value="nov2024">พฤศจิกายน 2024 (Nov 2024)</option>
+            <option value="dec2024">ธันวาคม 2024 (Dec 2024)</option>
+            <option value="custom">กำหนดช่วงวันที่เอง (Custom)</option>
+          </select>
+        </div>
+
+        <!-- Custom Date Range (hidden by default) -->
+        <div id="custom-date-inputs" class="filter-group" style="display:none; flex-direction:row; gap:6px; align-items:flex-end">
+          <div>
+            <label>จากวันที่</label>
+            <input type="date" id="issue-filter-date-from" class="filter-input" style="min-width:130px">
+          </div>
+          <div>
+            <label>ถึงวันที่</label>
+            <input type="date" id="issue-filter-date-to" class="filter-input" style="min-width:130px">
+          </div>
+        </div>
+
+        <!-- 5. Search Bar -->
+        <div class="filter-group" style="flex:1">
+          <label for="issue-search-input">ค้นหาปัญหา / ข้อความ</label>
+          <div class="search-input-wrap">
+            <i data-lucide="search"></i>
+            <input type="text" id="issue-search-input" placeholder="พิมพ์คำค้นหาในปัญหา, เมนู, ผู้แจ้ง, ข้อมูลทดสอบ, หมายเหตุ...">
+          </div>
+        </div>
+
+        <!-- Reset Button -->
+        <button class="reset-filters-btn" id="reset-issue-filters-btn">
+          <i data-lucide="rotate-ccw"></i>
+          <span>ล้างตัวกรอง</span>
+        </button>
+      </section>
+
+      <!-- Mini KPI Status Strip -->
+      <section class="filter-bar" style="padding:10px 20px; justify-content:space-between">
+        <div style="display:flex; gap:24px; align-items:center; font-size:13px">
+          <span>แสดงรายการ: <strong id="issue-count-total" style="color:var(--text-primary)">0</strong> รายการ</span>
+          <span style="color:var(--status-pass)">ผ่านการแก้ไข (Pass): <strong id="issue-count-pass">0</strong></span>
+          <span style="color:var(--status-danger)">ระดับสูง (High): <strong id="issue-count-high">0</strong></span>
+          <span style="color:var(--status-info)">รอทดสอบซ้ำ (Pending): <strong id="issue-count-pending">0</strong></span>
+        </div>
+        <button class="action-btn" id="export-issues-csv" style="padding:5px 12px; font-size:12px">
+          <i data-lucide="download"></i>
+          <span>ส่งออก CSV</span>
+        </button>
+      </section>
+
+      <!-- Visual Charts for Issues (Dynamic to filters) -->
+      <section style="display:grid; grid-template-columns: 1fr 2fr; gap:20px; margin-bottom:24px">
+        <div class="dashboard-card" style="padding:18px">
+          <h3 style="font-size:14px; font-weight:700; margin-bottom:12px; display:flex; align-items:center; gap:6px">
+            <i data-lucide="flame" style="color:var(--status-danger)"></i>
+            สัดส่วนตามความเร่งด่วน (Urgency)
+          </h3>
+          <div style="position:relative; height:180px">
+            <canvas id="issue-urgency-chart"></canvas>
+          </div>
+        </div>
+
+        <div class="dashboard-card" style="padding:18px">
+          <h3 style="font-size:14px; font-weight:700; margin-bottom:12px; display:flex; align-items:center; gap:6px">
+            <i data-lucide="bar-chart-2" style="color:var(--accent-blue)"></i>
+            การกระจายตัวตามสถานะผลลัพธ์ (Result Status)
+          </h3>
+          <div style="position:relative; height:180px">
+            <canvas id="issue-result-chart"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- Full Interactive Issue Table -->
+      <section class="table-container">
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th style="width:60px">#</th>
+                <th style="width:105px">วันที่</th>
+                <th style="width:95px">Urgency</th>
+                <th style="width:90px">Type</th>
+                <th style="width:140px">สถานะ (Result)</th>
+                <th>รายละเอียดปัญหาที่พบ (Problem)</th>
+                <th style="width:170px">เมนูที่เกิดปัญหา</th>
+                <th style="width:70px">ดู</th>
+              </tr>
+            </thead>
+            <tbody id="issues-table-body">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination Bar -->
+        <div class="pagination-bar">
+          <span id="issue-page-info">หน้า 1 จาก 1</span>
+          <div class="page-controls">
+            <button class="page-btn" id="issue-prev-btn">ก่อนหน้า</button>
+            <button class="page-btn" id="issue-next-btn">ถัดไป</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- ======================================================== -->
+    <!-- TAB 4: DATA SYNC & LIVE EXCEL REFRESH                    -->
+    <!-- ======================================================== -->
+    <main id="tab-panel-sync" class="tab-content-panel" style="display:none">
+      <section class="dashboard-card" style="max-width:960px; margin:0 auto">
+        <div class="card-header-bar">
+          <div class="card-title-group">
+            <h2>
+              <i data-lucide="refresh-cw" style="color:var(--accent-blue)"></i>
+              อัปเดตและรีเฟรชข้อมูล (Data Refresh & Sync)
+            </h2>
+            <p>เมื่อมีการแก้ไขหรือเพิ่มข้อมูลในไฟล์ Excel สามารถอัปเดต Dashboard ได้ทันที 2 วิธี</p>
+          </div>
+        </div>
+
+        <!-- Method 1: In-Browser Drag & Drop -->
+        <div style="margin-bottom:32px">
+          <h3 style="font-size:15px; font-weight:700; margin-bottom:10px; color:var(--text-primary)">
+            วิธีที่ 1: ลากและวางไฟล์ Excel ลงในหน้านี้โดยตรง (Real-time In-Browser Parser)
+          </h3>
+          <p style="font-size:13px; color:var(--text-secondary); margin-bottom:16px">
+            สามารถลากไฟล์ <span class="code-badge">Update_Progess_Booking_UAT.xlsx</span> หรือ <span class="code-badge">แจ้ง Issue Slot Booking Online UAT 5.xlsx</span> มาวางที่นี่ ระบบจะอ่านข้อมูลและอัปเดตกราฟทันทีโดยไม่ต้องรีโหลดหน้าเว็บ
+          </p>
+
+          <input type="file" id="sync-file-input" accept=".xlsx, .xls" style="display:none">
+          <div class="sync-dropzone" id="sync-file-dropzone">
+            <div class="sync-dropzone-icon">
+              <i data-lucide="upload-cloud" style="width:32px; height:32px"></i>
+            </div>
+            <div>
+              <h4 style="font-size:16px; font-weight:700; color:var(--text-primary); margin-bottom:4px">
+                ลากไฟล์ Excel มาวางที่นี่ หรือคลิกเพื่อเลือกไฟล์
+              </h4>
+              <p style="font-size:12.5px; color:var(--text-secondary)">
+                รองรับไฟล์นามสกุล .xlsx จากโฟลเดอร์นี้
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Method 2: Batch / PowerShell Refresh -->
+        <div class="sync-instructions">
+          <h3 style="font-size:15px; font-weight:700; margin-bottom:10px; color:var(--text-primary)">
+            วิธีที่ 2: ดับเบิ้ลคลิกไฟล์รีเฟรชอัตโนมัติ (Automated One-Click Refresh)
+          </h3>
+          <p style="font-size:13px; color:var(--text-secondary); line-height:1.6; margin-bottom:14px">
+            หากคุณเปิดและแก้ไขไฟล์ Excel ในเครื่อง เมื่อบันทึกไฟล์เสร็จสิ้นแล้ว สามารถอัปเดตฐานข้อมูล Dashboard ได้ง่ายๆ เพียง:
+          </p>
+          <ol style="font-size:13px; color:var(--text-secondary); line-height:1.8; margin-left:20px; margin-bottom:16px">
+            <li>เปิดโฟลเดอร์โครงการนี้บนเครื่องคอมพิวเตอร์ของคุณ</li>
+            <li>ดับเบิ้ลคลิกที่ไฟล์ <strong style="color:var(--accent-blue)">refresh_data.bat</strong> (หรือรัน <span class="code-badge">.\refresh_data.ps1</span> ใน PowerShell)</li>
+            <li>สคริปต์จะอ่านข้อมูลล่าสุดจากไฟล์ Excel ทั้งสองไฟล์และอัปเดต <span class="code-badge">data.js</span> ภายใน 10 วินาที</li>
+            <li>กลับมากดรีเฟรชหน้าเว็บนี้ (กด F5 หรือปุ่ม Refresh ของเบราว์เซอร์) ข้อมูลล่าสุดจะแสดงผลทันที</li>
+          </ol>
+          <div style="background:var(--bg-surface-elevated); padding:12px 16px; border-radius:var(--radius-md); font-size:12.5px; color:var(--text-muted); border:1px solid var(--border-subtle)">
+            <i data-lucide="info" style="width:14px; height:14px; vertical-align:middle; margin-right:4px; color:var(--accent-blue)"></i>
+            ระบบถูกออกแบบให้ทำงานแบบ Standalone ไม่ต้องต่ออินเทอร์เน็ต สามารถส่งทั้งโฟลเดอร์ให้ผู้บริหารเปิดดูได้ทันที
+          </div>
+        </div>
+      </section>
+    </main>
+
+  </div>
+
+  <!-- Detail Modal / Drawer for Issues -->
+  <div class="modal-overlay" id="detail-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div>
+          <h3 id="modal-title" style="font-size:18px; font-weight:700; color:var(--text-primary)">
+            รายละเอียดรายการ Issue
+          </h3>
+          <p style="font-size:12.5px; color:var(--text-secondary); margin-top:2px">
+            ข้อมูลเชิงลึกจากชีต Data (แจ้ง Issue Slot Booking Online UAT 5)
+          </p>
+        </div>
+        <button class="modal-close-btn" id="modal-close-btn">
+          <i data-lucide="x" style="width:20px; height:20px"></i>
+        </button>
+      </div>
+
+      <div class="modal-detail-grid" id="modal-grid">
+        <!-- Injected via JS -->
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; padding-top:16px; border-top:1px solid var(--border-subtle)">
+        <button class="action-btn" onclick="document.getElementById('detail-modal').classList.remove('active')">
+          ปิดหน้าต่าง
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- App Script -->
+  <script src="app.js"></script>
+</body>
+</html>
